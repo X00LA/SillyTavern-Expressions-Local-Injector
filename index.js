@@ -7,7 +7,7 @@
  */
 
 import { saveSettingsDebounced } from "../../../../script.js";
-import { extension_settings } from "../../../extensions.js";
+import { extension_settings, getContext } from "../../../extensions.js";
 
 const MODULE_NAME = "expressions_local_injector";
 
@@ -42,6 +42,26 @@ const defaultSettings = {
 
 // Kept before wrapping, also used for our own requests
 const originalFetch = window.fetch;
+
+// Last classified expression per character, kept while a reply is streaming
+const labelsBySpeaker = new Map();
+
+/**
+ * Name of the character whose message Expressions classifies, i.e. the last character message.
+ * @returns {string}
+ */
+function getSpeaker() {
+    const chat = getContext().chat ?? [];
+    for (let i = chat.length - 1; i >= 0; i--) {
+        if (!chat[i].is_user && !chat[i].is_system) return chat[i].name ?? "";
+    }
+    return "";
+}
+
+function isStreaming() {
+    const { streamingProcessor } = getContext();
+    return !!streamingProcessor && !streamingProcessor.isFinished;
+}
 
 function loadSettings() {
     if (!extension_settings[MODULE_NAME]) {
@@ -182,6 +202,13 @@ async function handleClassifyRequest(body) {
     }
     if (!text) return null;
 
+    // Expressions asks again every 2 seconds while a reply is streaming, because the text keeps changing.
+    // Like its own LLM mode, skip those requests and keep the character's expression; the finished reply is classified afterwards.
+    const speaker = getSpeaker();
+    if (isStreaming()) {
+        return labelsBySpeaker.get(speaker) ?? "neutral";
+    }
+
     try {
         const { label, reply } = await classify(text);
         if (!label) {
@@ -189,6 +216,7 @@ async function handleClassifyRequest(body) {
             showLastClassification(`No known expression in reply: ${reply.trim().slice(0, 80)}`);
             return null;
         }
+        labelsBySpeaker.set(speaker, label);
         showLastClassification(`${label} ← ${text.trim().slice(0, 80)}`);
         return label;
     } catch (error) {

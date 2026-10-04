@@ -57,6 +57,7 @@ The reply may be a single word or a sentence: the first expression mentioned in 
 
 ## Good to know
 
+- While a reply is streaming, Expressions asks again every 2 seconds, because the text keeps changing. The injector sends no requests during that time and keeps the character's last expression. Once the reply is complete, it is classified with a single request.
 - If the connection fails or the reply contains no known expression, the request goes to the built-in Local classifier instead, so Expressions keeps working. A failure shows a notification. The built-in classifier may download its local model the first time this happens.
 - While the injector is on, it also provides the list of expressions, so the local model is not loaded for that.
 - "Filter available expressions" from Character Expressions does not apply in Local mode. The model chooses from all expressions; if a sprite is missing, SillyTavern shows the fallback expression.
