@@ -1,0 +1,18 @@
+#eli_settings .eli_hint {
+    display: block;
+    margin: 5px 0;
+    opacity: 0.8;
+}
+
+#eli_settings .eli_row {
+    gap: 10px;
+    margin: 5px 0;
+}
+
+#eli_status.eli-status-ok {
+    color: #4caf50;
+}
+
+#eli_status.eli-status-fail {
+    color: #f44336;
+}

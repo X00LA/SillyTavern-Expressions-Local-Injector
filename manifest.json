@@ -1,0 +1,12 @@
+{
+    "display_name": "Expressions Local Injector",
+    "loading_order": 100,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "X00LA",
+    "version": "1.0.0",
+    "homePage": "https://github.com/X00LA/SillyTavern-Expressions-Local-Injector",
+    "auto_update": true
+}
